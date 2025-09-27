@@ -1,27 +1,81 @@
+using System.Collections.Specialized;
+using System.Security.Cryptography;
+using System.Threading;
 using UnityEngine;
+
+/// <summary>
+/// Permite el comportamiento del movimiento del jugador
+/// </summary>
 
 public class PlayerMovement : MonoBehaviour
 {
-    private Vector3 forceToApply;
-    private float timeSinceLastForce;
-    private float intervalTime;
+    #region Atributos
+    /// <summary>
+    /// Fuerza Utilizada para aplicar movimiento
+    /// </summary>
+    private Vector3 fuerzaPorAplicar;
+    /// <summary>
+    /// Representa el tiempo que ha transcurrido
+    /// desde la ultima aplicacion de fuerza
+    /// </summary>
+    private float tiempoDesdeUltimaFuerza;
+    /// <summary>
+    /// Indica cada cuanto tiempo debe aplicarse la fuerza
+    /// </summary>
+    private float intervaloTiempo;
+    /// <summary>
+    /// Indica la velocidad aplicada en el movimiento lateral
+    /// </summary>
+
+    /// <summary>
+    /// Representa la estrategia de movimento
+    /// </summary>
+    private IMovementStrategy movementStrategy;
+
+    private Player player;
+    #endregion
+
+    #region Ciclo de vida del script
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    private void Start()
+    void Start()
     {
-        forceToApply = new Vector3(0, 0, 10f);
-        timeSinceLastForce = 0f;
-        intervalTime = 2f;
+        fuerzaPorAplicar = new Vector3(0, 0, 6f);
+        tiempoDesdeUltimaFuerza = 0f;
+        intervaloTiempo = 2f;
+
+        player = new Player(5f, 5f);
+
+        //SetMovementStrategy(new SmoothMovement());
+        SetMovementStrategy(new AcelerateMovement());
     }
 
-    // Update is called once per frame
+    private void Update()
+    {
+        MovePlayer();
+    }
+
+    // Logica para la aplicacion de fuerzas 
     private void FixedUpdate()
     {
-        timeSinceLastForce += Time.fixedDeltaTime;
-        if(timeSinceLastForce >= intervalTime)
+        tiempoDesdeUltimaFuerza += Time.fixedDeltaTime;
+        if (tiempoDesdeUltimaFuerza >= intervaloTiempo)
         {
-            gameObject.GetComponent<Rigidbody>().AddForce(forceToApply, ForceMode.Impulse);
-            timeSinceLastForce = 0f;
+            GetComponent<Rigidbody>().AddForce(fuerzaPorAplicar, ForceMode.Impulse);
+            tiempoDesdeUltimaFuerza = 0f;
         }
+    }
+    #endregion
+
+    #region Logica del script
+
+    #endregion
+    public void MovePlayer()
+    {
+        movementStrategy.Move(transform, player);
+    }
+    public void SetMovementStrategy(IMovementStrategy movementStrategy)
+    {
+        this.movementStrategy = movementStrategy;
     }
 }
